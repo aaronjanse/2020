@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="icon" type="image/png" href="icon.png">
+        <meta name="author" content="Aaron Janse">
+        <title>Class of '24</title>
+        <style>
+            * {
+                overflow: hidden;
+                user-select: none;
+                font-family: "Comic Sans MS", "Comic Sans", cursive;
+            }
+            body {
+                background-color: #000;
+            }
+            .dead {
+                opacity: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.23.0.min.js"></script>
+        <script>(function(){
+            const feelings = ["bruh", "fuck"]
+            const time = 1.5 // seconds
+
+        	var pubnub = new PubNub({
+                publishKey: 'pub-c-431a7067-1c88-4b22-bbba-63421a375651',
+                subscribeKey: 'sub-c-939ce1b2-8b64-11ea-8e98-72774568d584'
+            });
+        
+        	pubnub.subscribe({channels: ['all']});
+        	pubnub.addListener({message: function(m) {
+                let val = parseInt(m.message)
+                if(val < 0 || val >= feelings.length) {
+                    return
+                }
+
+                let id = "x"+Math.floor(Math.random()*10000000)
+                
+                let span = document.createElement("span");
+                let text = document.createTextNode(feelings[val]);
+                span.appendChild(text)
+                span.style.position = 'absolute'
+                span.style.color = `hsl(${Math.floor(Math.random()*365)}, 100%, 50%)`
+                span.style.transform = `scale(${Math.random()*Math.sqrt(window.innerHeight)/2+0.25})`
+                span.style.transform += `rotate(${Math.random()*365}deg)`
+                span.style.transition = `opacity ${time}s`
+                span.style.left = `${Math.random()*window.innerWidth}px`
+                span.style.top = `${Math.random()*window.innerHeight}px`
+                document.body.appendChild(span)
+                setTimeout(function() {
+                    span.classList.add('dead')
+                }, 100)
+                setTimeout(function() {
+                    document.body.removeChild(span)
+                }, time*1000)
+            }});
+            document.onkeyup = document.onclick = function() {
+                pubnub.publish({
+        	        channel: 'all', message: ""+Math.floor(Math.random()*feelings.length),
+        	    });
+            }
+        })();</script>
+   </body>
+</html>
